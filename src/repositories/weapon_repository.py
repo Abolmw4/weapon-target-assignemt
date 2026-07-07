@@ -3,9 +3,12 @@ from src.entities.weapon import Weapon, WeaponStatus, WeapnType
 from typing import List
 
 class WeapnRepository(Repositroy):
+    def __init__(self, file_path: str) -> None:
+        super().__init__(file_path)
+        pass
+    
     def load(self) -> List[Weapon]:
         data = self.__load_json()
-        
         weapons = []
         
         for item in data:
