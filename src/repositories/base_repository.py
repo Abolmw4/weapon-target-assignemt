@@ -7,6 +7,6 @@ class Repositroy(ABC):
         super().__init__()
         self.file_path = Path(file_path)
         
-    def __load_json(self):
+    def _load_json(self):
         with open(self.file_path, "r", encoding='utf-8') as file:
             return json.load(file)

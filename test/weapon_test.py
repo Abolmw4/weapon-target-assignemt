@@ -14,7 +14,13 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(set(config.keys()), expected_keys)
     
-    
+    def test_get_output(self):
+        from src.repositories.base_repository import Repositroy
+        from src.repositories.compatibility_repository import CompatibilityRepository
+        
+        rpo = CompatibilityRepository(file_path="data/compatibility.json")
+        print(rpo.load())
+        
     
 if __name__ == '__main__':
     unittest.main()
