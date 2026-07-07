@@ -8,11 +8,19 @@ class WeaponStatus(Enum):
     MAINTANENCE = 3
     OFFLINE = 4
     READY = 5
+    
+class WeapnType(Enum):
+    SAM = 1
+    AAA = 2
+    JAMER = 3
+    AIRBASE = 4 
+    
 
 @dataclass
 class Weapon:
     id: int
     name: str
+    weapon_type: WeapnType
     positon: Tuple[float, float, float]
     min_range: float
     max_range: float

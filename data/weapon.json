@@ -1,0 +1,130 @@
+[
+    {
+        "id": 1,
+        "name": "SAM-1",
+        "position": [1000, 500, 600],
+        "min_range": 500,
+        "max_range": 25000,
+        "min_altitude": 50,
+        "max_altitude": 18000,
+        "ammo": 8,
+        "status": "READY",
+        "engagement_channels": 4,
+        "used_channels": 1
+    },
+    
+    {
+        "id": 2,
+        "name": "SAM-2",
+        "position": [1000, 500, 600],
+        "min_range": 500,
+        "max_range": 25000,
+        "min_altitude": 50,
+        "max_altitude": 18000,
+        "ammo": 16,
+        "status": "READY",
+        "engagement_channels": 4,
+        "used_channels": 1
+    },
+    
+    {
+        "id": 3,
+        "name": "SAM-3",
+        "position": [1000, 500, 600],
+        "min_range": 500,
+        "max_range": 25000,
+        "min_altitude": 50,
+        "max_altitude": 18000,
+        "ammo": 8,
+        "status": "READY",
+        "engagement_channels": 4,
+        "used_channels": 1
+    },
+    
+    
+    {
+        "id": 4,
+        "name": "AAA-1",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+    
+    {
+        "id": 5,
+        "name": "AAA-2",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+
+    {
+        "id": 6,
+        "name": "AAA-3",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+
+    {   
+        "id": 6,
+        "name": "jam-1",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+
+    {
+        "id": 7,
+        "name": "jam-2",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+
+    {
+        "id": 8,
+        "name": "jam-3",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    }
+
+    
+]
