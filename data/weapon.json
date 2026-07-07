@@ -2,6 +2,7 @@
     {
         "id": 1,
         "name": "SAM-1",
+        "type": "SAM",
         "position": [1000, 500, 600],
         "min_range": 500,
         "max_range": 25000,
@@ -16,6 +17,7 @@
     {
         "id": 2,
         "name": "SAM-2",
+        "type": "SAM",
         "position": [1000, 500, 600],
         "min_range": 500,
         "max_range": 25000,
@@ -30,6 +32,7 @@
     {
         "id": 3,
         "name": "SAM-3",
+        "type": "SAM",
         "position": [1000, 500, 600],
         "min_range": 500,
         "max_range": 25000,
@@ -45,6 +48,7 @@
     {
         "id": 4,
         "name": "AAA-1",
+        "type": "AAA",
         "position": [2000, 800, 600],
         "min_range": 100,
         "max_range": 3500,
@@ -59,6 +63,7 @@
     {
         "id": 5,
         "name": "AAA-2",
+        "type": "AAA",
         "position": [2000, 800, 600],
         "min_range": 100,
         "max_range": 3500,
@@ -73,6 +78,7 @@
     {
         "id": 6,
         "name": "AAA-3",
+        "type": "AAA",
         "position": [2000, 800, 600],
         "min_range": 100,
         "max_range": 3500,
@@ -85,22 +91,9 @@
     },
 
     {   
-        "id": 6,
-        "name": "jam-1",
-        "position": [2000, 800, 600],
-        "min_range": 100,
-        "max_range": 3500,
-        "min_altitude": 0,
-        "max_altitude": 3000,
-        "ammo": 400,
-        "status": "READY",
-        "engagement_channels": 1,
-        "used_channels": 0
-    },
-
-    {
         "id": 7,
-        "name": "jam-2",
+        "name": "jam-1",
+        "type": "JAMER",
         "position": [2000, 800, 600],
         "min_range": 100,
         "max_range": 3500,
@@ -114,7 +107,23 @@
 
     {
         "id": 8,
+        "name": "jam-2",
+        "type": "JAMER",
+        "position": [2000, 800, 600],
+        "min_range": 100,
+        "max_range": 3500,
+        "min_altitude": 0,
+        "max_altitude": 3000,
+        "ammo": 400,
+        "status": "READY",
+        "engagement_channels": 1,
+        "used_channels": 0
+    },
+
+    {
+        "id": 9,
         "name": "jam-3",
+        "type": "JAMER",
         "position": [2000, 800, 600],
         "min_range": 100,
         "max_range": 3500,
