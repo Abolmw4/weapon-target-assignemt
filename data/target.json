@@ -1,0 +1,57 @@
+[
+    {
+        "id": 1,
+        "type": "CRUISE_MISSILE",
+        "position": [12000, 6000, 13878],
+        "altitude": 300,
+        "speed": 250,
+        "heading": 45,
+        "priority": 9,
+        "value": 10
+    },
+
+    {
+        "id": 2,
+        "type": "BALLISTIC_MISSILE",
+        "position": [4000, 3000, 7579],
+        "altitude": 500,
+        "speed": 70,
+        "heading": 270,
+        "priority": 3,
+        "value": 2
+    }
+
+    {
+        "id": 3,
+        "type": "DRONE",
+        "position": [4000, 3000, 7579],
+        "altitude": 500,
+        "speed": 70,
+        "heading": 270,
+        "priority": 3,
+        "value": 2
+    }
+
+    {
+        "id": 4,
+        "type": "AIRCRAFT",
+        "position": [4000, 3000, 7579],
+        "altitude": 500,
+        "speed": 70,
+        "heading": 270,
+        "priority": 3,
+        "value": 2
+    }
+
+    {
+        "id": 5,
+        "type": "BOMBER",
+        "position": [4000, 3000, 7579],
+        "altitude": 500,
+        "speed": 70,
+        "heading": 270,
+        "priority": 3,
+        "value": 2
+    }
+    
+]

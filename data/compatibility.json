@@ -1,0 +1,24 @@
+{
+    "SAM": [
+        "CRUISE_MISSILE",
+        "AIRCRAFT",
+        "HELICOPTER",
+        "DRONE"
+    ],
+
+    "AAA": [
+        "HELICOPTER",
+        "AIRCRAFT",
+        "DRONE"
+    ],
+
+    "JAMMER": [
+        "DRONE"
+    ],
+
+    "FIGHTER": [
+        "AIRCRAFT",
+        "BOMBER",
+        "HELICOPTER"
+    ]
+}
