@@ -5,6 +5,7 @@ from src.entities.weapon import WeaponStatus
 from src.rules.status_rule import StatusRule
 from src.rules.range_rule import RangeRule
 from src.rules.compatibility_rule import CompatiblityRule
+from src.rules.altitude_rule import AltituedRule
 from src.repositories.compatibility_repository import CompatibilityRepository
 from src.repositories.base_repository import Repositroy
 from src.repositories.weapon_repository import WeapnRepository
@@ -84,3 +85,12 @@ class MyTestCase(unittest.TestCase):
         report = validator.validate(weapon=weapon, target=target, assignment=Assignment(assignment_id=1, weapon_id=weapon.id, target_id=target.id))
 
         self.assertFalse(report.valid)
+
+    def test_target_out_of_altitude_range(self):
+        validator = AssignmentValidator(rules=[AltituedRule()])
+        weapon = self.weapons[0]
+        target = self.targets[0]
+        
+        report = validator.validate(weapon=weapon, target=target, assignment=Assignment(assignment_id=1, weapon_id=weapon.id, target_id=target.id))
+        
+        self.assertTrue(report.valid)
