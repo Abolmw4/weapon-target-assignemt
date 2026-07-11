@@ -14,8 +14,9 @@
     "JAMMER": {
         "DRONE": 0.90,
         "AIRCRAFT": 0.88
-    }
-    "AIRCRAFT"{
+    },
+
+    "AIRCRAFT": {
         "CRUISE_MISSILE": 0.92,
         "AIRCRAFT": 0.88,
         "DRONE": 0.70

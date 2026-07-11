@@ -11,10 +11,11 @@ class TargetRepository(Repositroy):
     
     def load(self) -> List[Target]:
         results = []
-        data = self.__load_json()
+        data = self._load_json()
         for item in data:
             result = Target(id=item.get("id"), 
-                            target_class = TargetType[item.get("type")],
+                            target_class = TargetClass.HUSTILE,
+                            target_type=TargetType[item.get("type")],
                             position = item.get("position"),
                             altitude = item.get("altitude"),
                             speed = item.get("speed"),

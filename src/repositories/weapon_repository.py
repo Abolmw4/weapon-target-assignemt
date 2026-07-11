@@ -8,7 +8,7 @@ class WeapnRepository(Repositroy):
         pass
     
     def load(self) -> List[Weapon]:
-        data = self.__load_json()
+        data = super()._load_json()
         weapons = []
         
         for item in data:
@@ -25,3 +25,4 @@ class WeapnRepository(Repositroy):
                             engagement_channels = item.get("engagement_channels"),
                             used_channels = item.get("used_channels"))
             weapons.append(weapon)
+        return weapons

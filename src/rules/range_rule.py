@@ -1,8 +1,8 @@
 from src.rules.base_rule import BaseRule
-from entities.weapon import Weapon
-from entities.target import Target
-from entities.rule_result import RuleResult
-from utils.utils import calculate_distance
+from src.entities.weapon import Weapon
+from src.entities.target import Target
+from src.entities.rule_result import RuleResult
+from src.utils.utils import calculate_distance
 
 class RangeRule(BaseRule):
     def __init__(self):
