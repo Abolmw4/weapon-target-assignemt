@@ -1,4 +1,12 @@
 import yaml
+from typing import Tuple
+from math import radians, sin, cos, sqrt
+
+
+# WGS84 ellipsoid constants
+WGS84_A = 6378137.0
+WGS84_B = 6356752.314245
+WGS84_E2 = 1 - (WGS84_B ** 2) / (WGS84_A ** 2)
 
 
 def read_config_file(file_src: str="configs/scenario1.yaml") -> dict:
@@ -9,3 +17,35 @@ def read_config_file(file_src: str="configs/scenario1.yaml") -> dict:
             return configs
         except yaml.YAMLError as exc:
             print(exc)
+
+
+def geodetic_to_ecef(position: Tuple[float, float, float]) -> Tuple[float, float, float]:
+    lat_deg, lon_deg, alt_m = position
+
+    lat = radians(lat_deg)
+    lon = radians(lon_deg)
+
+    sin_lat = sin(lat)
+    cos_lat = cos(lat)
+    cos_lon = cos(lon)
+    sin_lon = sin(lon)
+
+    # Prime vertical radius of curvature
+    n = WGS84_A / sqrt(1 - WGS84_E2 * sin_lat ** 2)
+
+    x = (n + alt_m) * cos_lat * cos_lon
+    y = (n + alt_m) * cos_lat * sin_lon
+    z = (n * (1 - WGS84_E2) + alt_m) * sin_lat
+
+    return x, y, z
+
+
+def calculate_distance(position1: Tuple[float, float, float], position2: Tuple[float, float, float]) -> float:
+    x1, y1, z1 = geodetic_to_ecef(position1)
+    x2, y2, z2 = geodetic_to_ecef(position2)
+
+    dx = x1 - x2
+    dy = y1 - y2
+    dz = z1 - z2
+
+    return sqrt(dx ** 2 + dy ** 2 + dz ** 2)
