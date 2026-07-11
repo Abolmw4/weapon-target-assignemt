@@ -10,7 +10,7 @@ class PKRule(BaseRule):
         self.pk_table = repo.load()
         
     def check(self, weapon: Weapon, target: Target) -> RuleResult:
-        if self.pk_table[weapon.weapon_type][target.target_type] >= self.thresh:
+        if self.pk_table[weapon.weapon_type.name][target.target_type.name] >= self.thresh:
             return RuleResult(rule_name="PKRule", passed=True)
         
         return RuleResult(rule_name="PKRule", passed=False, reason=f"prob of kill less than {self.thresh}")
