@@ -6,10 +6,13 @@ from src.rules.status_rule import StatusRule
 from src.rules.range_rule import RangeRule
 from src.rules.compatibility_rule import CompatiblityRule
 from src.rules.altitude_rule import AltituedRule
+from src.rules.pk_rule import PKRule
 from src.repositories.compatibility_repository import CompatibilityRepository
 from src.repositories.base_repository import Repositroy
 from src.repositories.weapon_repository import WeapnRepository
 from src.repositories.target_repository import TargetRepository
+from src.rules.pk_rule import PKRule
+from src.repositories.pk_repository import PKRepository
 from src.entities.rule_result import RuleResult
 from src.validator.assignment_validator import AssignmentValidator
 from src.entities.weapon import Weapon
@@ -93,4 +96,12 @@ class MyTestCase(unittest.TestCase):
         
         report = validator.validate(weapon=weapon, target=target, assignment=Assignment(assignment_id=1, weapon_id=weapon.id, target_id=target.id))
         
+        self.assertTrue(report.valid)
+
+    def test_valid_prob_of_kill(self):
+        validator = AssignmentValidator(rules=[PKRule(thereshold=0.5, repo=PKRepository(file_path="/home/abolfazl/Documents/weapon-target-assignemt/data/pk.json"))])
+        weapon = self.weapons[0]
+        target = self.targets[0]
+        
+        report = validator.validate(weapon=weapon, target=target, assignment=Assignment(assignment_id=1, weapon_id=weapon.id, target_id=target.id))
         self.assertTrue(report.valid)
