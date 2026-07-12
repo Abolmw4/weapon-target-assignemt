@@ -19,17 +19,18 @@ from src.rules.pk_rule import PKRule
 from src.rules.altitude_rule import AltituedRule
 from src.entities.assignment import Assignment
 from src.entities.validation_report import ValidationReport
+import argparse
 
-def main():
-    weapons: Weapon = WeapnRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/weapon.json").load()
-    targets: Target = TargetRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/target.json").load()
+def main(args):
+    weapons: Weapon = WeapnRepository(args.weapon_data).load()
+    targets: Target = TargetRepository(args.target_data).load()
 
     validator = AssignmentValidator(rules=[StatusRule(), AmmoRule(),
-                                           CompatiblityRule(repo=CompatibilityRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/compatibility.json")),
+                                           CompatiblityRule(repo=CompatibilityRepository(args.compatibility_data)),
                                            RangeRule(),
                                            AltituedRule(),
                                            ChannelRule(),
-                                           PKRule(repo=PKRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/pk.json"), thereshold=0.7)])
+                                           PKRule(repo=PKRepository(args.pk_data), thereshold=args.threshold)])
     
     target, weapon = targets[0], weapons[0]
     manual_engine = ManualEngine(validator=validator)
@@ -44,4 +45,13 @@ def main():
                 print(rule)
 
 if __name__ == "__main__":
-    main()
+    
+    parser = argparse.ArgumentParser(description="weapon target assignment", epilog="python -m src.main -i")
+    parser.add_argument("--weapon_data", '-iw', default="/home/abolfazl/Documents/weapon-target-assignemt/data/weapon.json")
+    parser.add_argument("--target_data", '-it', default="/home/abolfazl/Documents/weapon-target-assignemt/data/target.json")
+    parser.add_argument("--compatibility_data", '-ic' , default="/home/abolfazl/Documents/weapon-target-assignemt/data/compatibility.json")
+    parser.add_argument("--pk_data", '-ip', default="/home/abolfazl/Documents/weapon-target-assignemt/data/pk.json")
+    parser.add_argument("--threshold", '-ithr', default=0.7)
+    args = parser.parse_args()
+    
+    main(args)
