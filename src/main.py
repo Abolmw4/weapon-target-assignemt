@@ -1,28 +1,46 @@
 import numpy as np
 import argparse
-from src.utils.utils import read_config_file
 from typing import Dict, List, Any
 from src.repositories.compatibility_repository import CompatibilityRepository
+from src.repositories.weapon_repository import WeapnRepository
+from src.repositories.target_repository import TargetRepository
+from src.repositories.compatibility_repository import CompatibilityRepository
+from src.repositories.pk_repository import PKRepository
+from src.entities.weapon import Weapon
+from src.entities.target import Target
+from src.engines.manual_engine import ManualEngine
+from src.validator.assignment_validator import AssignmentValidator
+from src.rules.ammo_rule import AmmoRule
+from src.rules.status_rule import StatusRule
+from src.rules.channel_rule import ChannelRule
+from src.rules.range_rule import RangeRule
+from src.rules.compatibility_rule import CompatiblityRule
+from src.rules.pk_rule import PKRule
+from src.rules.altitude_rule import AltituedRule
+from src.entities.assignment import Assignment
+from src.entities.validation_report import ValidationReport
 
 def main():
-    # conf = read_config_file(args.input)
-    
-    # # targets: List[Dict[str, Any]] = conf.get("Targets")
-    # weapons: Dict[str, Dict[Dict[str, Any]]] = conf.get("Weapons")
-    
-    # weapons_platforms: list[str] = list(weapons.keys())
-    # number_of_weapon_platform: int = len(list(weapons.keys()))
-    
-    # number_of_each_weapon_platform: Dict[str, int] = {weapon: len(weapons[weapon]) for weapon in weapons}
-    
+    weapons: Weapon = WeapnRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/weapon.json").load()    
+    targets: Target = TargetRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/target.json").load()
 
-    # parser = argparse.ArgumentParser(description='WEAPON TARGET ASSIGNMENT')
-    # parser.add_argument('-i','--input', help='input config file', default="/home/abolfazl/Documents/weapon-target-assignment/configs/scenario1.yaml")
+    validator = AssignmentValidator(rules=[StatusRule(), AmmoRule(),
+                                           CompatiblityRule(repo=CompatibilityRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/compatibility.json")),
+                                           RangeRule(),
+                                           AltituedRule(),
+                                           ChannelRule(),
+                                           PKRule(repo=PKRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/pk.json"), thereshold=0.7)])
     
-    # args = parser.parse_args()
-    # main(args)
+    manual_engine = ManualEngine(validator=validator)
+    
+    
+    validation_assignment: ValidationReport = manual_engine.run(weapon=weapons[0], target=targets[0], assignment=Assignment(assignment_id=1, weapon_id=weapons[0].id, target_id=targets[0].id))
+    
+    print(validation_assignment.valid)
+    if not validation_assignment.valid:
+        for rule in validation_assignment.result:
+            if not rule.passed:
+                print(rule)
 
-    repo = CompatibilityRepository(file_path="data/compatibility.json")
-    print(repo.load())
 if __name__ == "__main__":
     main()
