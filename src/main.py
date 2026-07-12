@@ -21,7 +21,7 @@ from src.entities.assignment import Assignment
 from src.entities.validation_report import ValidationReport
 
 def main():
-    weapons: Weapon = WeapnRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/weapon.json").load()    
+    weapons: Weapon = WeapnRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/weapon.json").load()
     targets: Target = TargetRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/target.json").load()
 
     validator = AssignmentValidator(rules=[StatusRule(), AmmoRule(),
@@ -31,15 +31,16 @@ def main():
                                            ChannelRule(),
                                            PKRule(repo=PKRepository("/home/abolfazl/Documents/weapon-target-assignemt/data/pk.json"), thereshold=0.7)])
     
+    target, weapon = targets[0], weapons[0]
     manual_engine = ManualEngine(validator=validator)
     
-    
-    validation_assignment: ValidationReport = manual_engine.run(weapon=weapons[0], target=targets[0], assignment=Assignment(assignment_id=1, weapon_id=weapons[0].id, target_id=targets[0].id))
+    validation_assignment: ValidationReport = manual_engine.run(weapon=weapon, target=target, assignment=Assignment(assignment_id=1, weapon_id=weapon.id, target_id=target.id))
     
     print(validation_assignment.valid)
     if not validation_assignment.valid:
         for rule in validation_assignment.result:
             if not rule.passed:
+                print(f"weapon: {weapons[0].name} can't be assigned to target: {targets[0].target_type}")
                 print(rule)
 
 if __name__ == "__main__":
