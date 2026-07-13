@@ -1,7 +1,12 @@
 from typing import List, Dict, Any, Tuple
+import json
 from math import radians, sin, cos, sqrt, asin
+from datetime import datetime
+import redis
 
-def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
+redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
+def weapon_target_assignment_functionality(weapon_id: int, target_id: int, redis_client):
     
     # Problem assumptions
     WGS84_A = 6378137.0
@@ -60,7 +65,7 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
     try:
         # target: Dict[str, Any] = get_target(target_id)
         # weapon: Dict[str, Any] = get_weapon(weapon_id)
-    
+
         target: Dict[str, Any] = {
             "id": 1,
             "type": "CRUISE_MISSILE",
@@ -98,11 +103,22 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
         print(f"can't get target and weapn. target and weapon is None")
         return {"level": "Error", "description": "can't get target and weapn. target or weapon is None"}
     
-    result: Dict[str, Dict[str, Any]] = {}
-    all_valid_assignment: List[int] = []
-    assignment_id = 0
+    # checking assignment
+    keys = list(redis_client.scan_iter("assignment:*"))
+
+    keys = [k for k in keys if k != "assignment:id"]
+    
+    if len(keys) != 0:
+        for k in keys:
+            assignment = json.loads(redis_client.get(k))
+            if weapon_id == assignment["weapon_id"] and target_id == assignment["target_id"]:
+                 return {"assignment_id": assignment["assignment_id"], "weapon_id": weapon["id"], "target_id": target["id"]}
+    
+    
+    
     
     # checking rules
+    result: Dict[str, Dict[str, Any]] = {}
     base_rules = ["StatusRule", "AmmoRule","CompatiblityRule", "RangeRule", "AltituedRule", "ChannelRule", "PKRule"]
     
     for rule in base_rules:
@@ -111,7 +127,6 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
                 result[rule] = {"status": True, "description": ""}
                 continue
             result[rule] = {"status": False, "description": "weapon not READY"}
-            
             
         elif rule == "AmmoRule":
             if weapon["ammo"] > 0:
@@ -129,17 +144,17 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
                 raise ValueError(f"Weapon type not valid weapot type must be '[SAM, AAA, JAMMER, FIGHTER]'")
         
         elif rule == "RangeRule":
-            range = calculate_horizontal_distance(weapon["position"], target["position"])
+            Range = calculate_horizontal_distance(weapon["position"], target["position"])
             if weapon["type"].upper() == "SAM":
                 for i, r in enumerate(weapon["ranges"]):
-                    if range <= r:
+                    if Range <= r:
                         result[rule] = {"status": True, "description": ""}
                         break
                 
                 if rule not in result:
                     result[rule] = {"status": False, "description": "target not in weapon range"}
                 
-            elif weapon["min_range"] < range < weapon["max_range"]:
+            elif weapon["min_range"] < Range < weapon["max_range"]:
                 result[rule] = {"status": True, "description": ""}
             
             else:
@@ -169,18 +184,17 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int):
     valid: bool = all(value["status"] for value in result.values())
     
     if valid:
-        if assignment_id == 0:
-            assignment_id += 1
-            all_valid_assignment.append(assignment_id)
+        # write to redis
+        assignment_id = redis_client.incr("assignment:id")
+        assignment = {"assignment_id": assignment_id, "weapon_id": weapon['id'], "target_id": target['id'], "weapon_info": weapon, "target_info": target, "results": result}        
+        try:
+            redis_client.set(f"assignment:{assignment_id}", json.dumps(assignment))    
             return {"assignment_id": assignment_id, "weapon_id": weapon["id"], "target_id": target["id"]}
-        else:
-            assignment_id = all_valid_assignment[-1] + 1
-            all_valid_assignment.append(assignment_id)
-            return {"assignment_id": assignment_id, "weapon_id": weapon["id"], "target_id": target["id"]}
-    
+        except RuntimeError as error:
+            return {"level":"Error", "description": f"assignment don. but can't write in redis."}
     else:
         return {"level": "warning", "description": f"these rules not passed {[k for k, value in result.items() if not value['status']]}"}
     
 if __name__ == "__main__":
-    result = weapon_target_assignment_functionality(1, 1)
+    result = weapon_target_assignment_functionality(1, 1, redis_client=redis_client)
     print(result)
