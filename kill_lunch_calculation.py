@@ -332,16 +332,8 @@ def enu_basis(lat_deg: float, lon_deg: float) -> Tuple[np.ndarray, np.ndarray, n
     lon = radians(lon_deg)
 
     east = np.array([-sin(lon), cos(lon), 0.0])
-    north = np.array([
-        -sin(lat) * cos(lon),
-        -sin(lat) * sin(lon),
-        cos(lat)
-    ])
-    up = np.array([
-        cos(lat) * cos(lon),
-        cos(lat) * sin(lon),
-        sin(lat)
-    ])
+    north = np.array([-sin(lat) * cos(lon), -sin(lat) * sin(lon), cos(lat)])
+    up = np.array([cos(lat) * cos(lon), cos(lat) * sin(lon), sin(lat)])
 
     return east, north, up
 
