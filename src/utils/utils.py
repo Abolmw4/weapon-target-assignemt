@@ -1,13 +1,14 @@
 import yaml
 from typing import Tuple
-from math import radians, sin, cos, sqrt
-
+from math import radians, sin, cos, sqrt, asin
+from typing import List
 
 # WGS84 ellipsoid constants
 WGS84_A = 6378137.0
 WGS84_B = 6356752.314245
 WGS84_E2 = 1 - (WGS84_B ** 2) / (WGS84_A ** 2)
 
+EARTH_RADIUS = 6371000.0  # meters
 
 def read_config_file(file_src: str="configs/scenario1.yaml") -> dict:
     with open(file_src, 'r') as stream:
@@ -49,3 +50,32 @@ def calculate_distance(position1: Tuple[float, float, float], position2: Tuple[f
     dz = z1 - z2
 
     return sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+
+
+
+# from math import radians, sin, cos, asin, sqrt
+
+
+
+def calculate_horizontal_distance(position1, position2):
+
+    lat1, lon1, _ = position1
+    lat2, lon2, _ = position2
+
+    lat1 = radians(lat1)
+    lon1 = radians(lon1)
+
+    lat2 = radians(lat2)
+    lon2 = radians(lon2)
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    )
+
+    c = 2 * asin(sqrt(a))
+
+    return EARTH_RADIUS * c

@@ -16,6 +16,7 @@ class WeapnRepository(Repositroy):
                             name = item.get("name"),
                             weapon_type = WeapnType[item.get("type")],
                             positon = item.get("position"),
+                            ranges = item.get("ranges"),
                             min_range = item.get("min_range"),
                             max_range = item.get("max_range"),
                             min_altitude = item.get("min_altitude"),

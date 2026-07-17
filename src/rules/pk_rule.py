@@ -14,3 +14,4 @@ class PKRule(BaseRule):
             return RuleResult(rule_name="PKRule", passed=True)
         
         return RuleResult(rule_name="PKRule", passed=False, reason=f"prob of kill less than {self.thresh}")
+

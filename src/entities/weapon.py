@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, Field
 from typing import Tuple
 from enum import Enum
 
@@ -22,6 +22,7 @@ class Weapon:
     name: str
     weapon_type: WeapnType
     positon: Tuple[float, float, float]
+    ranges: Tuple[float]
     min_range: float
     max_range: float
     min_altitude: float
