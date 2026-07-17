@@ -1,4 +1,5 @@
 from src.rules.base_rule import BaseRule
+
 from src.entities.weapon import Weapon, WeapnType
 from src.entities.target import Target
 from src.entities.rule_result import RuleResult

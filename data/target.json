@@ -3,6 +3,7 @@
         "id": 1,
         "type": "CRUISE_MISSILE",
         "position":  [35.7020, 51.3890, 1500],
+
         "altitude": 1500,
         "speed": 250,
         "heading": 45,

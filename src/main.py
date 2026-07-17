@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+
 from typing import Dict, List, Any
 from src.repositories.compatibility_repository import CompatibilityRepository
 from src.repositories.weapon_repository import WeapnRepository
@@ -44,6 +45,7 @@ def main(args):
                 print(f"weapon: {weapons[0].name} can't be assigned to target: {targets[0].target_type}")
                 print(rule)
 
+
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="weapon target assignment", epilog="python -m src.main -i")
@@ -55,3 +57,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     main(args)
+
