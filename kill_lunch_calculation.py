@@ -264,10 +264,15 @@
 #     print(result)
 
 
-from math import sin, cos, atan2, radians, degrees, sqrt
-from typing import Tuple, Dict, Optional, Any
+from math import sin, cos, atan2, radians, degrees, sqrt, asin
+from typing import Tuple, Dict, Optional, Any, List
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Qt5Agg")
 
+
+    
 ############################################################
 # WGS84 constants
 ############################################################
@@ -275,7 +280,7 @@ import numpy as np
 WGS84_A = 6378137.0
 WGS84_B = 6356752.314245
 WGS84_E2 = 1.0 - (WGS84_B ** 2) / (WGS84_A ** 2)
-
+EARTH_RADIUS = 6378137.0  # meter
 ############################################################
 # Geodetic <-> ECEF
 ############################################################
@@ -485,37 +490,146 @@ def fire_control_solution(weapon: Dict[str, Any], target: Dict[str, Any], vertic
             "elevation": round(elevation, 4)
             }
 
+def destination_point(lat: float, lon: float, distance: float, bearing: float) -> Tuple[float, float]:
+    '''
+    This function generate new point from start point in bearing side and specefic distance
+    :param lat: start point that I created another point from it (weapon position)
+    :param lon: start point that I created another point from it (weapon position)
+    :param distance: how to much missile distance from start point to another point (meter) in other words is the same is 'ranges' in weapon data
+    :param bearing: which side
+    :return: new point based on deg
+    :rtype: tuple[float, float]
+    '''
+    lat1 = radians(lat)
+    lon1 = radians(lon)
+    bearing = radians(bearing)
+
+    angular_distance = distance / EARTH_RADIUS
+
+    lat2 = asin(sin(lat1) * cos(angular_distance) + cos(lat1) * sin(angular_distance) * cos(bearing))
+
+    lon2 = lon1 + atan2(sin(bearing) * sin(angular_distance) * cos(lat1), cos(angular_distance) - sin(lat1) * sin(lat2))
+
+    return (degrees(lat2), degrees(lon2))
+
+def calculate_kill_zone(weapon_position: float, radius: float, start_angle: float=0, end_angle: float=360, step: float=50) -> List[Tuple[float, float]]:
+    '''
+    generate boundray points of killzone
+    
+    :param weapon_position: lat, lon, alt of weapon or luncher
+    :param radius: this parameter same is 'ranges' in weapon data json file. this paramter specified range in specefic altitude or layer
+    :param start_angle: which scope is considered for creating killingzone.eq(0 deg is front of weapon)
+    :param end_angle: which scope is considered for creating killingzone.eq(90 deg is front of weapon)
+    :param step: after generating each point increase agle based on step. eq(angel+=step)
+    '''
+    lat, lon, _ = weapon_position
+    polygon = []
+    angle = start_angle
+    while angle <= end_angle:
+        point = destination_point(lat, lon, radius, angle)
+        polygon.append(point)
+        angle += step
+    return polygon
+
+def calculate_all_kill_zones(weapon: Dict[str, Any]) -> Dict[float, List[Tuple[float, float]]]:
+    result = {}
+    for altitude, radius in zip(weapon["altitudes"], weapon["ranges"]):
+        polygon = calculate_kill_zone(weapon_position=weapon["position"], radius=radius, start_angle=0, end_angle=360, step=50)
+        result[altitude] = polygon
+    return result
+
 
 ############################################################
 # Example / Test
 ############################################################
-
 if __name__ == "__main__":
     weapon = {
         "id": 1,
         "name": "SAM-1",
         "type": "SAM",
-        "position": [35.6892, 51.3890, 1200],      # lat, lon, alt (m)
+        "position": [35.6892, 51.3890, 1200],
         "min_range": 500,
         "max_range": 6000,
         "min_altitude": 50,
         "max_altitude": 18000,
-        "missile_speed": 416.66666667,             # ~1500 km/h
-        "launch_delay": 0.5,                       # seconds
+        "altitudes": [50, 5000, 10000, 15000, 18000],
+        "ranges": [500, 1000, 1500, 2000, 6000],
+        "missile_speed": 416.66666667,
+        "launch_delay": 0.5,
         "status": "READY",
         "engagement_channels": 4,
-        "used_channels": 1
+        "used_channels": 1,
     }
 
     target = {
         "id": 1,
         "type": "CRUISE_MISSILE",
-        "position": [35.7020, 51.3890, 1500],      # lat, lon, alt (m)
-        "speed": 277.77777778,                     # ~1000 km/h
-        "heading": 45,                             # degrees
+        "position": [35.7020, 51.3890, 1500],
+        "speed": 277.77777778,
+        "heading": 45,
         "priority": 9,
-        "value": 10
+        "value": 10,
     }
 
     result = fire_control_solution(weapon, target)
     print(result)
+
+    zones = calculate_all_kill_zones(weapon)
+
+    plt.figure(figsize=(9, 9))
+
+    colors = ["green", "lime", "yellow", "orange", "red"]
+    for color, altitude in zip(colors, zones):
+        polygon = zones[altitude]
+        lats = [p[0] for p in polygon]
+        lons = [p[1] for p in polygon]
+        lats.append(lats[0])
+        lons.append(lons[0])
+        plt.plot(lons, lats, color=color, linewidth=1.5, label=f"KZ @ {altitude} m")
+
+    # ── 2) SAM  ──────────────────────────────────
+    w_lat, w_lon, w_alt = weapon["position"]
+    plt.scatter(w_lon, w_lat, c="black", s=100, marker="x", zorder=5, label="SAM (launcher)")
+
+    # ── 3) target current position ───────────────────────────────────
+    t_lat, t_lon, t_alt = target["position"]
+    plt.scatter(t_lon, t_lat, c="blue", s=80, marker="o", zorder=5, label="Target (now)")
+
+    # ── 4) Launch point + Kill point از fire_control_solution ─
+    if result.get("status"):
+        # launch_point / kill_point = (lat, lon, alt)
+        lp_lat, lp_lon, lp_alt = result["launch_point"]
+        kp_lat, kp_lon, kp_alt = result["kill_point"]
+
+        # points
+        plt.scatter(lp_lon, lp_lat, c="cyan", s=100, marker="s", zorder=6, label="Launch point (target@t_L)")
+        plt.scatter(kp_lon, kp_lat, c="magenta", s=120, marker="*", zorder=6, label="Kill point")
+
+        # predicted target path: now → launch → kill
+        plt.plot([t_lon, lp_lon, kp_lon], [t_lat, lp_lat, kp_lat], color="blue", linestyle="--", linewidth=1.5, zorder=4, label="Target track",)
+
+        # missle path: SAM → kill
+        plt.plot([w_lon, kp_lon], [w_lat, kp_lat], color="red", linestyle="-", linewidth=1.8, zorder=4, label="Missile path",)
+
+
+        plt.annotate(f"LP t={result['launch_time']}s", (lp_lon, lp_lat), textcoords="offset points", xytext=(6, 6), fontsize=8)
+        
+        plt.annotate(f"KP t={result['total_time']}s\nR={result['missile_distance']:.0f}m", (kp_lon, kp_lat), textcoords="offset points", xytext=(6, 6), fontsize=8)
+
+        # هشدار envelope (اختیاری)
+        md = result["missile_distance"]
+        if not (weapon["min_range"] <= md <= weapon["max_range"]):
+            print(f"[WARN] missile_distance {md:.1f}m خارج از [{weapon['min_range']}, {weapon['max_range']}]")
+        if not (weapon["min_altitude"] <= kp_alt <= weapon["max_altitude"]):
+            print(f"[WARN] kill alt {kp_alt:.1f}m خارج از envelope ارتفاع")
+    else:
+        print("No FCS:", result.get("reason"))
+
+    plt.xlabel("Longitude")
+    plt.ylabel("Latitude")
+    plt.title("Kill Zones + Launch Point + Kill Point")
+    plt.grid(True)
+    plt.legend(loc="best")
+    plt.axis("equal")
+    plt.tight_layout()
+    plt.show()
