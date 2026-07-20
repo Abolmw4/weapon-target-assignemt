@@ -67,13 +67,7 @@ def enu_basis(lat_deg: float, lon_deg: float) -> Tuple[np.ndarray, np.ndarray, n
     return east, north, up
 
 
-def target_velocity_ecef(
-    lat: float,
-    lon: float,
-    speed: float,
-    heading: float,
-    vertical_speed: float = 0.0,
-) -> np.ndarray:
+def target_velocity_ecef(lat: float, lon: float, speed: float, heading: float, vertical_speed: float = 0.0,) -> np.ndarray:
     """
     speed [m/s], heading [deg] (0=N, 90=E), vertical_speed [m/s] -> ECEF velocity
     """
@@ -83,15 +77,7 @@ def target_velocity_ecef(
     return horizontal * float(speed) + up * float(vertical_speed)
 
 
-def target_accel_ecef(
-    lat: float,
-    lon: float,
-    accel_horizontal: float = 0.0,
-    accel_heading_deg: Optional[float] = None,
-    heading_deg: float = 0.0,
-    accel_vertical: float = 0.0,
-    accel_enu: Optional[Tuple[float, float, float]] = None,
-) -> np.ndarray:
+def target_accel_ecef(lat: float, lon: float, accel_horizontal: float = 0.0, accel_heading_deg: Optional[float] = None, heading_deg: float = 0.0, accel_vertical: float = 0.0, accel_enu: Optional[Tuple[float, float, float]] = None) -> np.ndarray:
     """
     شتاب هدف در ECEF.
 
@@ -120,12 +106,7 @@ def target_accel_ecef(
 # Motion prediction (CV / CA)
 ############################################################
 
-def predict_position(
-    p0: np.ndarray,
-    v0: np.ndarray,
-    a0: Optional[np.ndarray],
-    dt: float,
-) -> np.ndarray:
+def predict_position(p0: np.ndarray, v0: np.ndarray, a0: Optional[np.ndarray], dt: float,) -> np.ndarray:
     """
     پیش‌بینی موقعیت بعد از dt ثانیه.
     a0=None یا صفر => Constant Velocity
@@ -138,11 +119,7 @@ def predict_position(
     return p0 + v0 * dt + 0.5 * a0 * (dt ** 2)
 
 
-def predict_velocity(
-    v0: np.ndarray,
-    a0: Optional[np.ndarray],
-    dt: float,
-) -> np.ndarray:
+def predict_velocity(v0: np.ndarray, a0: Optional[np.ndarray], dt: float,) -> np.ndarray:
     if a0 is None:
         return v0.copy()
     return v0 + a0 * dt
@@ -411,6 +388,7 @@ def fire_control_solution(
             missile_speed=missile_speed,
             launch_time=float(t_L),
             target_acc_ecef=a,
+            t_f_max=weapon["max_range"] / weapon["missile_speed"]
         )
         if sol is None:
             last_fail_reason = "No intercept solution"
@@ -570,33 +548,67 @@ def calculate_all_kill_zones(weapon: Dict[str, Any]) -> Dict[float, List[Tuple[f
 #     # print(result_ca)
 
 if __name__ == "__main__":
+    # weapon = {
+    #     "id": 1,
+    #     "name": "SAM-1",
+    #     "type": "SAM",
+    #     "position": [35.6892, 51.3890, 1200],
+    #     "min_range": 500,
+    #     "max_range": 6000,
+    #     "min_altitude": 50,
+    #     "max_altitude": 18000,
+    #     "altitudes": [50, 5000, 10000, 15000, 18000],
+    #     "ranges": [500, 1000, 1500, 2000, 6000],
+    #     "missile_speed": 416.66666667,
+    #     "launch_delay": 0.5,
+    #     "status": "READY",
+    #     "engagement_channels": 4,
+    #     "used_channels": 1,
+    # }
+
+    # target = {
+    #     "id": 1,
+    #     "type": "CRUISE_MISSILE",
+    #     "position": [35.7020, 51.3890, 1500],
+    #     "speed": 277.77777778,
+    #     "heading": 45,
+    #     "priority": 9,
+    #     "value": 10,
+    # }
+
+
     weapon = {
         "id": 1,
-        "name": "SAM-1",
+        "name": "SAM-MR-1",
         "type": "SAM",
-        "position": [35.6892, 51.3890, 1200],
-        "min_range": 500,
-        "max_range": 6000,
+        "position": [35.6892, 51.3890, 1180],
+        "min_range": 1000,
+        "max_range": 25000,                      # slant/overall ceiling — هم‌خوان با check_envelope
         "min_altitude": 50,
-        "max_altitude": 18000,
-        "altitudes": [50, 5000, 10000, 15000, 18000],
-        "ranges": [500, 1000, 1500, 2000, 6000],
-        "missile_speed": 416.66666667,
-        "launch_delay": 0.5,
+        "max_altitude": 20000,
+        # ranges = شعاع افقی تقریبی در هر لایه ارتفاعی (m)
+        "altitudes": [50, 1000, 3000, 6000, 10000, 15000, 20000],
+        "ranges":    [1500, 8000, 18000, 25000, 22000, 14000, 6000],
+        "missile_speed": 900.0,                  # ~Mach 2.6
+        "launch_delay": 1.2,                     # ready to lunch s
         "status": "READY",
         "engagement_channels": 4,
-        "used_channels": 1,
-    }
+        "used_channels": 0,
+        "ammo": 8,                             
+        }
 
     target = {
         "id": 1,
         "type": "CRUISE_MISSILE",
-        "position": [35.7020, 51.3890, 1500],
-        "speed": 277.77777778,
-        "heading": 45,
+        "position": [35.6200, 51.3000, 250],     # جنوب‌غربی سایت؛ فاصله افقی ~10–11 km
+        "speed": 250.0,                          # ~900 km/h — کروز مادون‌صوت
+        "heading": 45.0,                         # به سمت NE → نزدیک‌شونده به SAM
         "priority": 9,
         "value": 10,
+        "altitude": 250,
     }
+
+
 
     result = fire_control_solution(weapon, target)
     print(result)
@@ -660,4 +672,3 @@ if __name__ == "__main__":
     plt.axis("equal")
     plt.tight_layout()
     plt.show()
-
