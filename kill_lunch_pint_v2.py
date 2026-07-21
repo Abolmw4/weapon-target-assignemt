@@ -305,7 +305,7 @@ def fire_control_solution(
     target: Dict[str, Any],
     *,
     vertical_speed: float = 0.0,
-    # شتاب اختیاری هدف (برای مانور). اگر ندارید صفر بماند => CV
+    # شتاب اختیاری هدف (برای مانور). => CV
     accel_horizontal: float = 0.0,
     accel_heading_deg: Optional[float] = None,
     accel_vertical: float = 0.0,
@@ -320,17 +320,6 @@ def fire_control_solution(
     launch_search_dt: float = 0.5,
     require_envelope: bool = True,
 ) -> Dict[str, Any]:
-    """
-    محاسبهٔ fire solution.
-
-    launch_point = موقعیت هدف در لحظهٔ شلیک (طبق تعریف شما).
-    این تابع را باید روی هر آپدیت track دوباره صدا بزنید.
-
-    ورودی‌های مفید برای هدف مانوردار:
-    - vertical_speed
-    - accel_*  یا accel_ecef از فیلتر
-    - velocity_ecef از فیلتر (بهتر از speed/heading خام)
-    """
     # ---- positions ----
     launcher_point_geo = tuple(weapon["position"]) # launcher(I mean weapon postion) position
     weapon_ecef = geodetic_to_ecef(launcher_point_geo) # weapon position based on x, y, z
@@ -474,7 +463,7 @@ def destination_point(lat: float, lon: float, distance: float, bearing: float) -
 
     return (degrees(lat2), degrees(lon2))
 
-def calculate_kill_zone(weapon_position: float, radius: float, start_angle: float=0, end_angle: float=360, step: float=50) -> List[Tuple[float, float]]:
+def calculate_kill_zone(weapon_position: float, radius: float, start_angle: float=0, end_angle: float=360, step: float=5) -> List[Tuple[float, float]]:
     '''
     generate boundray points of killzone
     
@@ -496,12 +485,9 @@ def calculate_kill_zone(weapon_position: float, radius: float, start_angle: floa
 def calculate_all_kill_zones(weapon: Dict[str, Any]) -> Dict[float, List[Tuple[float, float]]]:
     result = {}
     for altitude, radius in zip(weapon["altitudes"], weapon["ranges"]):
-        polygon = calculate_kill_zone(weapon_position=weapon["position"], radius=radius, start_angle=0, end_angle=360, step=50)
+        polygon = calculate_kill_zone(weapon_position=weapon["position"], radius=radius, start_angle=0, end_angle=360, step=5)
         result[altitude] = polygon
     return result
-
-
-
 
 
 ############################################################
@@ -548,65 +534,70 @@ def calculate_all_kill_zones(weapon: Dict[str, Any]) -> Dict[float, List[Tuple[f
 #     # print(result_ca)
 
 if __name__ == "__main__":
-    # weapon = {
-    #     "id": 1,
-    #     "name": "SAM-1",
-    #     "type": "SAM",
-    #     "position": [35.6892, 51.3890, 1200],
-    #     "min_range": 500,
-    #     "max_range": 6000,
-    #     "min_altitude": 50,
-    #     "max_altitude": 18000,
-    #     "altitudes": [50, 5000, 10000, 15000, 18000],
-    #     "ranges": [500, 1000, 1500, 2000, 6000],
-    #     "missile_speed": 416.66666667,
-    #     "launch_delay": 0.5,
-    #     "status": "READY",
-    #     "engagement_channels": 4,
-    #     "used_channels": 1,
-    # }
-
-    # target = {
-    #     "id": 1,
-    #     "type": "CRUISE_MISSILE",
-    #     "position": [35.7020, 51.3890, 1500],
-    #     "speed": 277.77777778,
-    #     "heading": 45,
-    #     "priority": 9,
-    #     "value": 10,
-    # }
-
-
     weapon = {
         "id": 1,
-        "name": "SAM-MR-1",
+        "name": "SAM-1",
         "type": "SAM",
-        "position": [35.6892, 51.3890, 1180],
-        "min_range": 1000,
-        "max_range": 25000,                      # slant/overall ceiling — هم‌خوان با check_envelope
+        "position": [35.6892, 51.3890, 1200],
+        "min_range": 500,
+        "max_range": 6000,
         "min_altitude": 50,
-        "max_altitude": 20000,
-        # ranges = شعاع افقی تقریبی در هر لایه ارتفاعی (m)
-        "altitudes": [50, 1000, 3000, 6000, 10000, 15000, 20000],
-        "ranges":    [1500, 8000, 18000, 25000, 22000, 14000, 6000],
-        "missile_speed": 900.0,                  # ~Mach 2.6
-        "launch_delay": 1.2,                     # ready to lunch s
+        "max_altitude": 18000,
+        "altitudes": [50, 5000, 10000, 15000, 18000],
+        "ranges": [500, 1000, 1500, 2000, 6000],
+        "max_elevation": -5.0,
+        "min_elevation": 70.0,
+        "missile_speed": 950,
+        "launch_delay": 0.5,
         "status": "READY",
         "engagement_channels": 4,
-        "used_channels": 0,
-        "ammo": 8,                             
-        }
+        "used_channels": 1,
+    }
 
     target = {
         "id": 1,
         "type": "CRUISE_MISSILE",
-        "position": [35.6200, 51.3000, 250],     # جنوب‌غربی سایت؛ فاصله افقی ~10–11 km
-        "speed": 250.0,                          # ~900 km/h — کروز مادون‌صوت
-        "heading": 45.0,                         # به سمت NE → نزدیک‌شونده به SAM
+        # "position": [35.7020, 51.3890, 1500],
+        "position": [35.68, 51.30, 1500],
+        "speed": 277.77777778,
+        "heading": 90,
         "priority": 9,
         "value": 10,
-        "altitude": 250,
     }
+
+
+    # weapon = {
+    #     "id": 1,
+    #     "name": "SAM-MR-1",
+    #     "type": "SAM",
+    #     "position": [35.6892, 51.3890, 1180],
+    #     "min_range": 1000,
+    #     "max_range": 25000,                      # slant/overall ceiling — هم‌خوان با check_envelope
+    #     "min_altitude": 50,
+    #     "max_altitude": 20000,
+    #     # ranges = شعاع افقی تقریبی در هر لایه ارتفاعی (m)
+    #     "altitudes": [50, 1000, 3000, 6000, 10000, 15000, 20000],
+    #     "ranges":    [1500, 8000, 18000, 25000, 22000, 14000, 6000],
+    #     "max_elevation": -5.0,
+    #     "min_elevation": 70.0,
+    #     "missile_speed": 900.0,                  # ~Mach 2.6
+    #     "launch_delay": 1.2,                     # ready to lunch s
+    #     "status": "READY",
+    #     "engagement_channels": 4,
+    #     "used_channels": 0,
+    #     "ammo": 8,                             
+    #     }
+
+    # target = {
+    #     "id": 1,
+    #     "type": "CRUISE_MISSILE",
+    #     "position": [35.6200, 51.3000, 250],     # جنوب‌غربی سایت؛ فاصله افقی ~10–11 km
+    #     "speed": 250.0,                          # ~900 km/h — کروز مادون‌صوت
+    #     "heading": 45.0,                         # به سمت NE → نزدیک‌شونده به SAM
+    #     "priority": 9,
+    #     "value": 10,
+    #     "altitude": 250,
+    # }
 
 
 
