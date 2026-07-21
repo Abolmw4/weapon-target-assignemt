@@ -535,8 +535,6 @@ def is_blind_zone(weapon_ecef: np.ndarray, kill_point_ecef: np.ndarray, weapon_p
     return elevation > max_elevation, elevation
 
 
-
-
 ############################################################
 # Example
 ############################################################
@@ -592,8 +590,8 @@ if __name__ == "__main__":
         "max_altitude": 18000,
         "altitudes": [50, 5000, 10000, 15000, 18000],
         "ranges": [500, 1000, 1500, 2000, 6000],
-        "max_elevation": 50.0,
-        "min_elevation": 10.0,
+        "max_elevation": 75.0,
+        "min_elevation": 5.0,
         "missile_speed": 950,
         "launch_delay": 0.5,
         "status": "READY",
@@ -607,7 +605,7 @@ if __name__ == "__main__":
         # "position": [35.7020, 51.3890, 1500],
         "position": [35.70, 51.3891, 1500],
         "speed": 277.77777778,
-        "heading": 0,
+        "heading": 90,
         "priority": 9,
         "value": 10,
     }
