@@ -392,6 +392,20 @@ def fire_control_solution(
             weapon, kill_geo, sol["missile_distance"], az, el
         )
 
+
+
+        ########################################################
+        # Blind Zone Check
+        ########################################################
+
+        blind, elevation = is_blind_zone(weapon_ecef, sol["kill_point_ecef"], weapon["position"], weapon["max_elevation"])
+
+        if blind:
+            return {"status": False, "reason": "Kill point is inside radar blind zone.", "elevation": elevation, "max_elevation": weapon["max_elevation"]}
+
+
+
+
         result = {
             "status": True,
             # زمان‌ها نسبت به «الان» (لحظهٔ محاسبه / آپدیت track)
@@ -439,7 +453,9 @@ def fire_control_solution(
     return {"status": False, "reason": last_fail_reason}
 
 
-
+############################################################
+# Calculating killing zone
+############################################################
 
 def destination_point(lat: float, lon: float, distance: float, bearing: float) -> Tuple[float, float]:
     '''
@@ -488,6 +504,37 @@ def calculate_all_kill_zones(weapon: Dict[str, Any]) -> Dict[float, List[Tuple[f
         polygon = calculate_kill_zone(weapon_position=weapon["position"], radius=radius, start_angle=0, end_angle=360, step=5)
         result[altitude] = polygon
     return result
+
+
+############################################################
+# specifing blind zone
+############################################################
+
+def is_blind_zone(weapon_ecef: np.ndarray, kill_point_ecef: np.ndarray, weapon_position: Tuple[float, float, float], max_elevation: float) -> bool:
+    '''
+    Check missile blind zone.
+    
+    :param weapon_ecef: Description
+    :type weapon_ecef: np.ndarray
+    :param kill_point_ecef: Description
+    :type kill_point_ecef: np.ndarray
+    :param weapon_position: Description
+    :type weapon_position: Tuple[float, float, float]
+    :param max_elevation: degree
+    :type max_elevation: float
+    :return: Description
+    :rtype: bool
+    '''
+    elevation = calculate_elevation(
+        weapon_ecef,
+        kill_point_ecef,
+        weapon_position[0],
+        weapon_position[1]
+    )
+
+    return elevation > max_elevation, elevation
+
+
 
 
 ############################################################
@@ -545,8 +592,8 @@ if __name__ == "__main__":
         "max_altitude": 18000,
         "altitudes": [50, 5000, 10000, 15000, 18000],
         "ranges": [500, 1000, 1500, 2000, 6000],
-        "max_elevation": -5.0,
-        "min_elevation": 70.0,
+        "max_elevation": 50.0,
+        "min_elevation": 10.0,
         "missile_speed": 950,
         "launch_delay": 0.5,
         "status": "READY",
@@ -558,9 +605,9 @@ if __name__ == "__main__":
         "id": 1,
         "type": "CRUISE_MISSILE",
         # "position": [35.7020, 51.3890, 1500],
-        "position": [35.68, 51.30, 1500],
+        "position": [35.70, 51.3891, 1500],
         "speed": 277.77777778,
-        "heading": 90,
+        "heading": 0,
         "priority": 9,
         "value": 10,
     }
