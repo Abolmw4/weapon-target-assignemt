@@ -4,9 +4,9 @@ from math import radians, sin, cos, sqrt, asin
 from datetime import datetime
 import redis
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+# redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
-def weapon_target_assignment_functionality(weapon_id: int, target_id: int, redis_client):
+def weapon_target_assignment_functionality(weapon_id: int, target_id: int, target_type: str, redis_client):
     
     # Problem assumptions
     WGS84_A = 6378137.0
@@ -136,10 +136,10 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int, redis
         
         elif rule == "CompatiblityRule":
             if weapon["type"] in weapon_compatibility:
-                if target["type"] in weapon_compatibility[weapon["type"]]:
+                if target_type in weapon_compatibility[weapon["type"]]:
                     result[rule] = {"status": True, "description": ""}
                     continue
-                result[rule] = {"status": False, "description": f"based on weapon_compatibility weapon {weapon['type']} can't engaged with target {target['type']}"}
+                result[rule] = {"status": False, "description": f"based on weapon_compatibility weapon {weapon['type']} can't engaged with target {target_type}"}
             else:
                 raise ValueError(f"Weapon type not valid weapot type must be '[SAM, AAA, JAMMER, FIGHTER]'")
         
@@ -173,10 +173,10 @@ def weapon_target_assignment_functionality(weapon_id: int, target_id: int, redis
             result[rule] = {"status": False, "description": "weapon engagment channel in used."}
         
         elif rule == "PKRule":
-            if pk[weapon["type"]][target["type"]] >= PROB_OF_KILL_THERESHOLD:
+            if pk[weapon["type"]][target_type] >= PROB_OF_KILL_THERESHOLD:
                 result[rule] = {"status": True, "description": ""}
                 continue
-            result[rule] = {"status": False, "description": f"because of prob of kill {weapon['type']} -> target {target['type']} {pk[weapon['type']][target['type']]} <= {PROB_OF_KILL_THERESHOLD}"}
+            result[rule] = {"status": False, "description": f"because of prob of kill {weapon['type']} -> target {target_type} {pk[weapon['type']][target_type]} <= {PROB_OF_KILL_THERESHOLD}"}
         
         else:
             raise RuntimeError(f"this is fucking invalid '{rule}'")
